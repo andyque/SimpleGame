@@ -1,7 +1,9 @@
 #include "AppDelegate.h"
 #include "GameScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
+using namespace CocosDenshion;
 
 AppDelegate::AppDelegate() {
 
@@ -36,6 +38,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
+    
+    //preload the music & effects
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("background-music-aac.caf");
+    SimpleAudioEngine::getInstance()->preloadEffect("pew-pew-lei.caf");
 
     // create a scene. it's an autorelease object
     auto scene = GameScene::createScene();

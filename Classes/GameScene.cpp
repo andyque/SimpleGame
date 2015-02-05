@@ -1,14 +1,20 @@
 #include "GameScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
+using namespace CocosDenshion;
+
 
 Scene* GameScene::createScene()
 {
-    // 'scene' is an autorelease object
-    auto scene = Scene::create();
+    //this line will add physics to our scene
+    auto scene = Scene::createWithPhysics();
+    scene->getPhysicsWorld()->setGravity(Vec2(0,0));
+    scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
+//    layer->setPhysicsWorld(scene->getPhysicsWorld());
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -40,6 +46,22 @@ bool GameScene::init()
     _player->setPosition(Vec2(winSize.width/8, winSize.height/2));
     this->addChild(_player);
     
+    // create a static PhysicsBody
+    auto playerSize = _player->getContentSize();
+    auto physicsBody = PhysicsBody::createBox(Size(playerSize.width , playerSize.height), PhysicsMaterial(0.1f, 1.0f, 0.0f));
+    //cocos2d-x lack the collision group, I think we should add it
+    
+    //this line will let the physicsBody won't collide with anyother physics body with default collisionBitMask
+    physicsBody->setCategoryBitmask(0);
+    
+    // sprite will use physicsBody
+    _player->setPhysicsBody(physicsBody);
+    
+    //add contact event listener
+    auto contactListener = EventListenerPhysicsContact::create();
+    contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegan, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
+    
     
     this->schedule(schedule_selector(GameScene::addMonster), 1.5);
     
@@ -54,7 +76,19 @@ bool GameScene::init()
     //the second node parameter can't be nullptr
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(eventListener, _player);
     
+    //play background musci
+    SimpleAudioEngine::getInstance()->playBackgroundMusic("background-music-aac.caf",true);
     
+    return true;
+}
+
+bool GameScene::onContactBegan(cocos2d::PhysicsContact &contact)
+{
+    auto bodyA = contact.getShapeA()->getBody()->getNode();
+    auto bodyB = contact.getShapeB()->getBody()->getNode();
+    
+    bodyA->removeFromParent();
+    bodyB->removeFromParent();
     return true;
 }
 
@@ -79,10 +113,20 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *unused_event
     projectile->setPosition(_player->getPosition());
     this->addChild(projectile);
     
+    //add physics
+    auto projectileSize = projectile->getContentSize();
+    auto physicsBody = PhysicsBody::createCircle(projectileSize.width/2 );
+    physicsBody->setContactTestBitmask(0xFFFFFFFF);
+    
+    projectile->setPhysicsBody(physicsBody);
+    
     //4
     auto actionMove = MoveTo::create(1.5f, targetPosition);
     auto actionRemove = RemoveSelf::create();
     projectile->runAction(Sequence::create(actionMove,actionRemove, nullptr));
+    
+    
+    SimpleAudioEngine::getInstance()->playEffect("pew-pew-lei.caf");
     
     return true;
 }
@@ -93,6 +137,15 @@ void GameScene::addMonster(float dt)
     //in c++11, we prefer auto in local variable decleration over regular class pointers
     auto monster = Sprite::create("monster.png");
     
+    //add physics
+    auto monsterSize = monster->getContentSize();
+    auto physicsBody = PhysicsBody::createBox(Size(monsterSize.width , monsterSize.height),
+                                              PhysicsMaterial(0.1f, 1.0f, 0.0f));
+    //cocos2d-x lack the collision group, I think we should add it
+    physicsBody->setContactTestBitmask(0xFFFFFFFF);
+    
+    monster->setPhysicsBody(physicsBody);
+ 
     //1
     auto monsterContentSize = monster->getContentSize();
     auto selfContentSize = this->getContentSize();
