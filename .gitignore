@@ -26,3 +26,5 @@
 *.exe
 *.out
 *.app
+
+/proj.ios_mac/SimpleGame.xcodeproj/project.xcworkspace/xcuserdata/guanghui.xcuserdatad/UserInterfaceState.xcuserstate
