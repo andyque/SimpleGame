@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
+#include "Constans.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -10,7 +11,8 @@ Scene* GameScene::createScene()
     //this line will add physics to our scene
     auto scene = Scene::createWithPhysics();
     scene->getPhysicsWorld()->setGravity(Vec2(0,0));
-    scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+    //toggle debug draw
+//    scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
@@ -39,7 +41,7 @@ bool GameScene::init()
     background->drawSolidRect(origin, winSize, Color4F(0.6,0.6,0.6,1.0));
     this->addChild(background);
     
-    srand(time(NULL));
+    srand((unsigned int)time(nullptr));
     
     //add player
     _player = Sprite::create("player.png");
@@ -77,7 +79,7 @@ bool GameScene::init()
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(eventListener, _player);
     
     //play background musci
-    SimpleAudioEngine::getInstance()->playBackgroundMusic("background-music-aac.caf",true);
+    SimpleAudioEngine::getInstance()->playBackgroundMusic(BACKGROUND_MUSIC_SFX,true);
     
     return true;
 }
@@ -126,7 +128,7 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *unused_event
     projectile->runAction(Sequence::create(actionMove,actionRemove, nullptr));
     
     
-    SimpleAudioEngine::getInstance()->playEffect("pew-pew-lei.caf");
+    SimpleAudioEngine::getInstance()->playEffect(PEW_PEW_SFX);
     
     return true;
 }

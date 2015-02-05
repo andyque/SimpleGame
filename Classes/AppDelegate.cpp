@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
+#include "Constans.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -32,6 +33,31 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLViewImpl::create("My Game");
         director->setOpenGLView(glview);
     }
+    
+    //set multiple resolution adpation
+    Size designSize = Size(480,320);
+    Size frameSize = glview->getFrameSize();
+    Size resourceSize = Size(480,320);
+    
+    auto fileUtils = FileUtils::getInstance();
+    std::vector<std::string> searchPaths;
+    
+    if (frameSize.height >320)
+    {
+        resourceSize = Size(960, 640);
+        searchPaths.push_back("hd");
+    }
+    else
+    {
+        searchPaths.push_back("sd");
+    }
+    searchPaths.push_back("res");
+    searchPaths.push_back("Sounds");
+    fileUtils->setSearchPaths(searchPaths);
+    
+    director->setContentScaleFactor(resourceSize.height / designSize.height);
+    
+    director->getOpenGLView()->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::FIXED_HEIGHT);
 
     // turn on display FPS
     director->setDisplayStats(true);
@@ -40,8 +66,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0 / 60);
     
     //preload the music & effects
-    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("background-music-aac.caf");
-    SimpleAudioEngine::getInstance()->preloadEffect("pew-pew-lei.caf");
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic(BACKGROUND_MUSIC_SFX);
+    SimpleAudioEngine::getInstance()->preloadEffect(PEW_PEW_SFX);
 
     // create a scene. it's an autorelease object
     auto scene = GameScene::createScene();
@@ -57,7 +83,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-    // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+//     SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
