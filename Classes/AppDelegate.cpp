@@ -1,10 +1,7 @@
 #include "AppDelegate.h"
-#include "GameScene.h"
-#include "SimpleAudioEngine.h"
-#include "Constans.h"
+#include "HelloWorldScene.h"
 
 USING_NS_CC;
-using namespace CocosDenshion;
 
 AppDelegate::AppDelegate() {
 
@@ -30,30 +27,27 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
     if(!glview) {
-       // glview = GLViewImpl::createWithRect("SimpleGame", Rect(0,0, 1136, 640), 0.5);
-		glview = GLViewImpl::create("SimpleGame");
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT) || (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
+        glview = GLViewImpl::create("SimpleGame");
+#else
+        glview = GLViewImpl::createWithRect("SimpleGame", Rect(0,0, 1024, 768), 0.5);
+#endif
         director->setOpenGLView(glview);
     }
     
+    //configure the multiple resolution
     //set multiple resolution adpation
     Size designSize = Size(480,320);
     Size frameSize = glview->getFrameSize();
-    Size resourceSize = Size(480,320);
+    Size resourceSize = Size(960,640);
     
     auto fileUtils = FileUtils::getInstance();
     std::vector<std::string> searchPaths;
     
-    if (frameSize.height >320)
-    {
-        resourceSize = Size(960, 640);
-        searchPaths.push_back("hd");
-    }
-    else
-    {
-        searchPaths.push_back("sd");
-    }
-    searchPaths.push_back("res");
+    
+    searchPaths.push_back("images");
     searchPaths.push_back("Sounds");
+    
     fileUtils->setSearchPaths(searchPaths);
     
     director->setContentScaleFactor(resourceSize.height / designSize.height);
@@ -65,13 +59,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
-    
-    //preload the music & effects
-    SimpleAudioEngine::getInstance()->preloadBackgroundMusic(BACKGROUND_MUSIC_SFX);
-    SimpleAudioEngine::getInstance()->preloadEffect(PEW_PEW_SFX);
 
     // create a scene. it's an autorelease object
-    auto scene = GameScene::createScene();
+    auto scene = HelloWorld::createScene();
 
     // run
     director->runWithScene(scene);
@@ -84,7 +74,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-//     SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+    // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
